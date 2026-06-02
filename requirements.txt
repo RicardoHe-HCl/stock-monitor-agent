@@ -1,0 +1,13 @@
+# A-share monitor dependencies.
+# Note: keep this file ASCII-only. pip reads it with the system locale
+# (GBK on zh-CN Windows) and would fail on non-ASCII comments.
+# akshare/openai iterate fast and akshare relies on live web endpoints,
+# so they use a minimum-version floor instead of a pinned exact version.
+# Install:  py -m pip install -r requirements.txt
+
+akshare>=1.16.0          # A-share quotes / news / disclosures
+openai>=1.0.0            # OpenAI-compatible client for DeepSeek analysis
+streamlit>=1.40.0        # web UI
+APScheduler>=3.10.4      # scheduled polling
+pandas>=2.2.0            # akshare returns DataFrames
+python-dotenv>=1.0.1     # load API key from .env
