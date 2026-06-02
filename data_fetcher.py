@@ -15,6 +15,7 @@ data_fetcher.py — 数据抓取层
 """
 
 import logging
+import random
 import time
 from typing import Any
 
@@ -96,11 +97,23 @@ _MOCK_NAME_BY_CODE = {m["code"]: m["name"] for m in _MOCK_TOP_MOVERS}
 def get_mock_top_movers(top_n: int = config.TOP_N) -> list[dict]:
     """返回模拟涨速榜（已按涨速降序），最多 top_n 条。
 
+    每次调用都会给每只股票的涨速叠加一个 -0.3 ~ +0.8 的随机扰动，
+    这样反复刷新时涨速会变化，便于演示「异动提醒」的触发。
+    扰动偏向正向（上界 0.8 > 下界 0.3），更容易越过提醒阈值。
+    扰动后重新按涨速降序排序，保证榜单仍是有序的涨速榜；涨速保留两位小数。
+
     返回深拷贝，避免上层无意修改污染常量。
     """
     import copy
 
-    return copy.deepcopy(_MOCK_TOP_MOVERS[:top_n])
+    movers = copy.deepcopy(_MOCK_TOP_MOVERS[:top_n])
+    for m in movers:
+        jitter = random.uniform(-0.3, 0.8)
+        # 叠加扰动并兜底不为负（涨速可正可负，这里演示用，限制最低 0）
+        m["speed"] = round(max(0.0, m["speed"] + jitter), 2)
+    # 扰动可能打乱原有顺序，重新降序排列，维持「涨速榜」语义
+    movers.sort(key=lambda m: m["speed"], reverse=True)
+    return movers
 
 
 def get_mock_news(code: str, name: str | None = None,
